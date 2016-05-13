@@ -1,0 +1,6 @@
+[submodule "MediaInfoLib"]
+	path = MediaInfoLib
+	url = https://github.com/MediaArea/MediaInfoLib.git
+[submodule "ZenLib"]
+	path = ZenLib
+	url = https://github.com/MediaArea/ZenLib.git
