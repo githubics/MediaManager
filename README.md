@@ -6,7 +6,7 @@ http://bit.ly/githubics-ivi-opensource
 Clone this repository with the --recursive option into a media-manager directory
 to get all submodules
 ```
-git clone --recursive git@gitlab.ics.com:media-manager/media-manager.git media-manager
+git clone --recursive https://github.com/githubics/MediaManager.git media-manager
 ```
 This will create
 ```
