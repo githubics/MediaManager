@@ -25,6 +25,7 @@
 
 #include <QObject>
 #include <QJsonArray>
+#include <QStringList>
 
 /*!
  * \brief MediaManagerControllerInterface
@@ -36,7 +37,6 @@
 
 // forward declare Qt classes
 QT_BEGIN_NAMESPACE
-class QStringList;
 class QUrl;
 QT_END_NAMESPACE
 

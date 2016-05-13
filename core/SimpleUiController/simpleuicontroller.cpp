@@ -28,10 +28,10 @@
 SimpleUiController::SimpleUiController()
     : engine(new QQmlEngine()),
       quickView(new QQuickView()),
-      m_activeMediaSession("NoMediaType"),
+      m_activeMediaSession("NoType"),
     myAudioModel(new PlayListModel(this)),
     myVideoModel(new PlayListModel(this)),
-    myState(MediaPlayerInterface::Stopped)
+    myState(mmTypes::Stopped)
 
 {
     connect(myAudioModel,SIGNAL(currentTrackChanged()), this, SIGNAL(currentTrackChanged()));
@@ -42,17 +42,16 @@ SimpleUiController::SimpleUiController()
     quickView->engine()->rootContext()->setContextProperty("controller", this);
     quickView->engine()->addImageProvider("coverArt", myAudioModel->currentCoverArt());
     quickView->setSource(QUrl(QStringLiteral("qrc:/simpleuicontroller/main.qml")));
+// FIXME: This needs to become a real configuration option for when we build for a Genivi Device
+//    quickView->setProperty("IVI-Surface-ID",3);
 
     // All views opened should be set to FramelessWindowHint. Doing it in main is not a good idea because
     // some windows might not get created until later. We can create a MediaManager QuickView base class
     // and set the window flags we want there at some point if we think it is needed
     quickView->setFlags(Qt::FramelessWindowHint);
-    // FIXME: I was super surprised that this actually worked, until i set the window hint here properly
-    // and it still works.
-    // You are casting a translucent background which is a widget attribute that flag will likely be quietly
-    // rejected is my guess - we oughta check with Justin or Vlad on this one :-)
-//    quickView->setFlags(quickView->flags() | static_cast<Qt::WindowFlags>(Qt::WA_TranslucentBackground));
 
+// FIXME: For a quick demo on the ICS 3 screen setup
+//    quickView->setX(2480);quickView->setY(200);
     quickView->show();
 }
 
@@ -79,10 +78,10 @@ void SimpleUiController::setActiveMediaSession(QString activeMediaSession)
 
 void SimpleUiController::setActiveMediaSessionPlaylist(const QJsonArray playList)
 {
-    qDebug() << Q_FUNC_INFO << playList;
+    qDebug() << Q_FUNC_INFO/* << playList*/;
     // TODO: whatever needs to be done with it...
     // mostly update the Model to show in the UI
-    PlayListModel * currentModel = (m_activeMediaSession == "AudioFileMediaType")? myAudioModel : myVideoModel;
+    PlayListModel * currentModel = (m_activeMediaSession == "AudioFile")? myAudioModel : myVideoModel;
     currentModel->revert();
     currentModel->insertRows(0, playList.count(), QModelIndex());
     for(int pos = 0; pos < playList.count(); pos++)
@@ -90,7 +89,7 @@ void SimpleUiController::setActiveMediaSessionPlaylist(const QJsonArray playList
         currentModel->setData(currentModel->index(pos,0,QModelIndex()), playList[pos].toVariant(), Qt::UserRole);
     }
 
-    if(m_activeMediaSession == "AudioFileMediaType")
+    if(m_activeMediaSession == "AudioFile")
         emit audioPlaylistChanged();
     else emit videoPlaylistChanged();
 }
@@ -115,14 +114,14 @@ void SimpleUiController::setPlayState(const MediaPlayerInterface::PlayState play
 
 int SimpleUiController::currentIndex() const
 {
-        PlayListModel * currentModel = (m_activeMediaSession == "AudioFileMediaType")? myAudioModel : myVideoModel;
+    PlayListModel * currentModel = (m_activeMediaSession == "AudioFile")? myAudioModel : myVideoModel;
     return currentModel->currentIndex();
 }
 
 void SimpleUiController::setCurrentTrackIndex(const int index)
 {
     qDebug() << Q_FUNC_INFO << index;
-        PlayListModel * currentModel = (m_activeMediaSession == "AudioFileMediaType")? myAudioModel : myVideoModel;
+    PlayListModel * currentModel = (m_activeMediaSession == "AudioFile")? myAudioModel : myVideoModel;
     if(currentModel->currentIndex() != index){
         currentModel->setCurrentIndex(index);
         emit requestTrackAtIndex(index);
@@ -174,7 +173,7 @@ QStringList SimpleUiController::mediaSessions() const
 
 QJsonObject SimpleUiController::currentTrack() const
 {
-    PlayListModel * currentModel = (m_activeMediaSession == "AudioFileMediaType")? myAudioModel : myVideoModel;
+    PlayListModel * currentModel = (m_activeMediaSession == "AudioFile")? myAudioModel : myVideoModel;
     return currentModel->currentTrack();
 }
 

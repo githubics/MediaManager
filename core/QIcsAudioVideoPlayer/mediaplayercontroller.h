@@ -28,7 +28,6 @@
 class MediaPlayerController : public QObject
 {
     Q_OBJECT
-    Q_ENUMS(PlaybackState)
     Q_PROPERTY(QString track READ track  WRITE setTrack  NOTIFY trackChanged)
     Q_PROPERTY(QString mediaMode READ mediaMode  WRITE setMediaMode  NOTIFY mediaModeChanged)
 
@@ -38,6 +37,11 @@ class MediaPlayerController : public QObject
 
 public:
     enum PlaybackState {StoppedState=0, PlayingState, PausedState};
+#if QT_VERSION < 0x050500
+    Q_ENUMS(PlaybackState)
+#else
+    Q_ENUM(PlaybackState)
+#endif
 
     explicit MediaPlayerController(QObject *parent = 0);
     QString track() const;

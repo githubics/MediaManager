@@ -26,8 +26,8 @@
 
 #include <QtQuick/QQuickView>
 
+#include "../QIcsMediaManager/mediamanagertypes.h"
 #include "../QIcsMediaManager/mediamanagercontrollerinterface.h"
-#include "../QIcsMediaManager/mediaplayerinterface.h"
 class PlayListModel;
 
 class SimpleUiController : public MediaManagerControllerInterface
@@ -41,10 +41,10 @@ class SimpleUiController : public MediaManagerControllerInterface
     Q_PROPERTY(QVariantList audioPlaylist READ audioPlaylist NOTIFY audioPlaylistChanged)
     Q_PROPERTY(QVariantList videoPlaylist READ videoPlaylist NOTIFY videoPlaylistChanged)
     Q_PROPERTY(QStringList mediaSessions READ mediaSessions WRITE setMediaSessions NOTIFY mediaSessionsChanged)
-    Q_PROPERTY(MediaPlayerInterface::PlayState playState READ playState WRITE setPlayState NOTIFY playStateChanged)
+    Q_PROPERTY(mmTypes::PlayState playState READ playState WRITE setPlayState NOTIFY playStateChanged)
 
 public:
-    Q_ENUMS(MediaPlayerInterface::PlayState)
+
     SimpleUiController();
     ~SimpleUiController() {}
 
@@ -68,6 +68,7 @@ public:
     int currentIndex() const;
     QJsonObject currentTrack() const;
     MediaPlayerInterface::PlayState playState() const;
+
 
 
 public slots:
@@ -99,7 +100,7 @@ private:
     QStringList m_mediaSessions;
     PlayListModel * myAudioModel;
     PlayListModel * myVideoModel;
-    MediaPlayerInterface::PlayState myState;
+    mmTypes::PlayState myState;
 };
 
 #endif // SIMPLEUICONTROLLER_H

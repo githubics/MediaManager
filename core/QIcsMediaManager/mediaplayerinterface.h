@@ -18,6 +18,8 @@
 */
 #ifndef MEDIAPLAYERINTERFACE_H
 #define MEDIAPLAYERINTERFACE_H
+#include "mediamanagertypes.h"
+
 #include <QtPlugin>
 
 #include <QObject>
@@ -28,13 +30,13 @@ QT_BEGIN_NAMESPACE
 class QStringList;
 QT_END_NAMESPACE
 
+
 class MediaPlayerInterface : public QObject
 {
     Q_OBJECT
 
 public:
-    enum PlayState {Playing = 0, Paused, Stopped};
-    Q_ENUM(PlayState)
+    typedef mmTypes::PlayState PlayState;
 
     explicit MediaPlayerInterface(QObject * parent=0) : QObject(parent) {}
     virtual ~MediaPlayerInterface() {}
@@ -52,13 +54,13 @@ public slots:
     virtual void next() const = 0;
     virtual void previous() const = 0;
     virtual void setCurrentTrack(int index) const = 0;
-    virtual void setVideoRectangle(const QRect rect) const {Q_UNUSED(rect)};
+    virtual void setVideoRectangle(const QRect rect) const {Q_UNUSED(rect);}
 
 signals:
     /** Must emit this signal so that the Controllers are notified
      *  when the current state changes
      **/
-    void playStateChanged(PlayState state);
+    void playStateChanged(PlayState state) const;
     /** Must emit this signal so that the Controllers are notified
      *  when the current track changes
      **/

@@ -17,7 +17,7 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 #ifndef QT_NO_DEBUG_OUTPUT
-#define QT_NO_DEBUG_OUTPUT
+//#define QT_NO_DEBUG_OUTPUT
 #endif
 #include <QDebug>
 #include "qicsmediaplayer.h"
@@ -31,13 +31,14 @@ QIcsMediaPlayer::QIcsMediaPlayer(QObject *parent)
 
 {
     m_mediaPlayer->setVolume(m_currentVolume);
+    connect(m_mediaPlayer,&QMediaPlayer::stateChanged,this,&QIcsMediaPlayer::sendPlayState);
     m_currentlyPlaying = QMediaPlayer::StoppedState;
     connect(m_mediaPlaylist,&QMediaPlaylist::currentIndexChanged,this,&MediaPlayerInterface::currentTrackIndexChanged);
 }
 
 void QIcsMediaPlayer::setMediaPlaylist(const QStringList playList)
 {
-
+    m_mediaPlaylist->clear();
     foreach(QString song, playList){
         m_mediaPlaylist->addMedia(QUrl(song));
     }
@@ -66,20 +67,21 @@ const QSet<QString> QIcsMediaPlayer::supportedFileSuffixes() const
     return suffixes;
 }
 
-void QIcsMediaPlayer::translatePlayStates() const
+void QIcsMediaPlayer::sendPlayState(QMediaPlayer::State state) const
 {
-    qDebug() << Q_FUNC_INFO << m_mediaPlayer->state();
-    switch (m_mediaPlayer->state()) {
+    qDebug() << Q_FUNC_INFO << state;
+    switch (state) {
     case QMediaPlayer::StoppedState:
-        m_playState=MediaPlayerInterface::Stopped;
+        m_playState=mmTypes::Stopped;
         break;
     case QMediaPlayer::PausedState:
-        m_playState=MediaPlayerInterface::Paused;
+        m_playState=mmTypes::Paused;
         break;
     case QMediaPlayer::PlayingState:
-        m_playState=MediaPlayerInterface::Playing;
+        m_playState=mmTypes::Playing;
         break;
     }
+    emit playStateChanged(m_playState);
 }
 
 void QIcsMediaPlayer::play() const
@@ -88,7 +90,7 @@ void QIcsMediaPlayer::play() const
 
     if(m_mediaPlayer->state()!= QMediaPlayer::PlayingState) {
         m_mediaPlayer->play();
-        translatePlayStates();
+//        translatePlayStates();
     }
 }
 
@@ -97,7 +99,7 @@ void QIcsMediaPlayer::pause() const
     qDebug() << Q_FUNC_INFO;
     if(m_mediaPlayer->state() != QMediaPlayer::PausedState) {
         m_mediaPlayer->pause();
-        translatePlayStates();
+//        translatePlayStates();
     }
 }
 
@@ -106,7 +108,7 @@ void QIcsMediaPlayer::stop() const
     qDebug() << Q_FUNC_INFO;
     if(m_mediaPlayer->state() != QMediaPlayer::StoppedState){
         m_mediaPlayer->stop();
-        translatePlayStates();
+//        translatePlayStates();
     }
 }
 

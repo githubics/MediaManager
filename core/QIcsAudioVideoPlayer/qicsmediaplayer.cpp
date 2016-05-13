@@ -139,13 +139,13 @@ void QIcsMediaPlayer::translatePlayState() const
 {
     switch (m_audioVideoPlayerController->playbackState()) {
     case MediaPlayerController::StoppedState:
-        m_playState=MediaPlayerInterface::Stopped;
+        m_playState=mmTypes::Stopped;
         break;
     case MediaPlayerController::PausedState:
-        m_playState=MediaPlayerInterface::Paused;
+        m_playState=mmTypes::Paused;
         break;
     case MediaPlayerController::PlayingState:
-        m_playState=MediaPlayerInterface::Playing;
+        m_playState=mmTypes::Playing;
         break;
     }
 }

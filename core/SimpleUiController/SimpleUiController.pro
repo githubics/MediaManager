@@ -8,7 +8,7 @@ QT       += core qml quick
 
 TARGET = SimpleUiController
 TEMPLATE = lib
-CONFIG += plugin c++11
+CONFIG += plugin
 
 DESTDIR = ../plugins
 
@@ -19,7 +19,7 @@ SOURCES += \
 
 HEADERS += \
     ../QIcsMediaManager/mediamanagercontrollerinterface.h \
-    ../QIcsMediaManager/mediaplayerinterface.h \
+    ../QIcsMediaManager/mediamanagertypes.h \
     simpleuicontroller.h \
     playlistmodel.h \
     coverartprovider.h

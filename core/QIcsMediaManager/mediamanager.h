@@ -26,6 +26,7 @@
 #include "mediasession.h"
 #include "mediasource.h"
 #include "mediaplayerinterface.h"
+#include "mediamanagertypes.h"
 
 class QPluginLoader;
 class MediaDeviceFactory;
@@ -68,15 +69,16 @@ class MediaManager : public QObject
 {
     Q_OBJECT
 public:
-    /** Known MediaDevice for which we can load plugins */
-    enum MediaDeviceType { NoDeviceType=0, USBDeviceType, IPodDeviceType };
+//    /** Known MediaDevice for which we can load plugins */
+//    enum MediaDeviceType { NoDeviceType=0, USBDeviceType, IPodDeviceType };
 
-    /** Known MediaTypes for which player plugins have been found */
-    enum MediaType {NoMediaType=0, AudioFileMediaType, VideoFileMediaType, EndMediaType };
+//    /** Known MediaTypes for which player plugins have been found */
+//    enum MediaType {NoMediaType=0, AudioFileMediaType, VideoFileMediaType, EndMediaType };
 
-    Q_ENUM(MediaDeviceType)
-    Q_ENUM(MediaType)
-
+//    Q_ENUM(MediaDeviceType)
+//    Q_ENUM(MediaType)
+    typedef mmTypes::MediaDevice MediaDeviceType;
+    typedef mmTypes::MediaType MediaType;
 
     explicit MediaManager(QObject *parent = 0);
 
@@ -99,8 +101,7 @@ signals:
      **/
     void activeMediaSessionChanged(const QString mediaType);
 
-//    void mediaPlaylistChanged();
-//    void playStateChanged();
+    /** Signal emitted when one of the players state changes */
     void mediaPlayStateChanged(MediaPlayerInterface::PlayState state) const;
 
     /** Signal emitted when the MediaManager wants to notify controllers of the active
@@ -173,11 +174,11 @@ private:
     void loadDeviceManagerPlugin(QPluginLoader &pluginLoader, const QString pluginName, const int pluginVersionNumber);
 
     /** Helper function that converts a QString to a known MediaType */
-    MediaManager::MediaType mediaTypeFromString(const QString mediaTypeStr) const;
+//    MediaManager::MediaType mediaTypeFromString(const QString mediaTypeStr) const;
     /** Helper function that converts a MediaType to QString */
-    QString mediaTypeToString(const MediaManager::MediaType type) const;
+//    QString mediaTypeToString(const MediaManager::MediaType type) const;
     /** Helper function that converts a QString to a known MediaDeviceType */
-    MediaManager::MediaDeviceType mediaDeviceTypeFromString(const QString mediaDeviceTypeStr) const;
+//    MediaManager::MediaDeviceType mediaDeviceTypeFromString(const QString mediaDeviceTypeStr) const;
 
     /** This is the private implementation, the public one only allows to set the active session by QString.
         It calls this function which emits signal activeMediaSessionChanged */

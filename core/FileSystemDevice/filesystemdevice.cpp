@@ -189,11 +189,18 @@ QJsonObject FileSystemDevice::getMediaSourceList(const QUrl url) const
 
     // TODO: Define this object somewhere and just fill it here with
     // data.
+    // FIXME: If we want C++11 here we have to CONFIG += c++11 not only here
+    // but also in MediaInforLib and ZenLib which are statically linked agains this plugin
+#if 0
     QJsonObject mediaObject = {
         {"DeviceUrl",url.url()}, // this is likely obsolete
-        {"AudioFileMediaType",worker.audioFiles()},
-        {"VideoFileMediaType",worker.videoFiles()}
+        {"AudioFile",worker.audioFiles()},
+        {"VideoFile",worker.videoFiles()}
     };
-
+#endif
+    QJsonObject mediaObject;
+    mediaObject.insert("DeviceUrl",url.url()); // this is likely obsolete
+    mediaObject.insert("AudioFile",worker.audioFiles());
+    mediaObject.insert("VideoFile",worker.videoFiles());
     return mediaObject;
 }

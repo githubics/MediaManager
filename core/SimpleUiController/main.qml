@@ -51,8 +51,8 @@ Rectangle{
                 left: sessionColumn.left
                 right: sessionColumn.right
             }
-            enabled: controller.activeMediaSession !== "AudioFileMediaType"
-            onClicked: controller.activeMediaSession = "AudioFileMediaType"
+            enabled: controller.activeMediaSession !== "AudioFile"
+            onClicked: controller.activeMediaSession = "AudioFile"
             activated: !enabled
 
         }
@@ -65,8 +65,8 @@ Rectangle{
                 left: sessionColumn.left
                 right: sessionColumn.right
             }
-            enabled: controller.activeMediaSession !== "VideoFileMediaType"
-            onClicked: controller.activeMediaSession = "VideoFileMediaType"
+            enabled: controller.activeMediaSession !== "VideoFile"
+            onClicked: controller.activeMediaSession = "VideoFile"
             activated: !enabled
         }
 
@@ -78,8 +78,8 @@ Rectangle{
                 left: sessionColumn.left
                 right: sessionColumn.right
             }
-            enabled: controller.activeMediaSession !== "EndMediaType"
-            onClicked: controller.activeMediaSession = "EndMediaType"
+            enabled: controller.activeMediaSession !== "EndType"
+            onClicked: controller.activeMediaSession = "EndType"
             activated: !enabled
         }
     }
@@ -122,7 +122,7 @@ Rectangle{
                 Connections{
                     target: controller
                     onActiveMediaSessionChanged:{
-                        if(!root.transitions.running && controller.activeMediaSession === "VideoFileMediaType"){
+                        if(!root.transitions.running && controller.activeMediaSession === "VideoFile"){
                             var view = root.mapFromItem(videoSpace.vidRect)
                             // TODO: Would like to revisit this and see if it it the UI that should determine the size of the
                             // player or whether the controller should have some more to say about this.
@@ -143,7 +143,7 @@ Rectangle{
             states:[
                 State{
                     name: "audio"
-                    when: controller.activeMediaSession === "AudioFileMediaType"
+                    when: controller.activeMediaSession === "AudioFile"
                     PropertyChanges{
                         target: audioSpace
                         visible: true
@@ -152,7 +152,7 @@ Rectangle{
                 },
                     State{
                         name: "video"
-                        when: controller.activeMediaSession === "VideoFileMediaType"
+                        when: controller.activeMediaSession === "VideoFile"
                         PropertyChanges{
                             target: videoSpace
                             visible: true
@@ -161,7 +161,7 @@ Rectangle{
                 },
                 State{
                     name: "blue"
-                    when: controller.activeMediaSession === "EndMediaType"
+                    when: controller.activeMediaSession === "EndType"
                     PropertyChanges{
                         target: blueSpace
                         visible: true
@@ -187,7 +187,7 @@ Rectangle{
 
         TimeLineSlider{
             id: trackSlider
-            visible: controller.activeMediaSession !== "EndMediaType"
+            visible: controller.activeMediaSession !== "EndType"
             anchors{
                 bottom: playbackRow.top
                 left: parent.left
@@ -198,7 +198,7 @@ Rectangle{
 
         Row{
             id: playbackRow
-            enabled:controller.activeMediaSession !== "EndMediaType"
+            enabled:controller.activeMediaSession !== "EndType"
             anchors{
                 horizontalCenter: parent.horizontalCenter
                 bottom: parent.bottom
@@ -264,7 +264,7 @@ Rectangle{
     states:[
         State{
             name: "open"
-            when: controller.activeMediaSession !== "NoMediaType"
+            when: controller.activeMediaSession !== "NoType"
             AnchorChanges{
                 target: currentSessionRect
                 anchors.right: root.right

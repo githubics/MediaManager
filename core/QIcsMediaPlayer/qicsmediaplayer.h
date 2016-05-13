@@ -63,7 +63,6 @@ protected:
     quint8 m_currentVolume;
 
 signals:
-    void playStateChanged(PlayState state);
     void currentTrackIndexChanged(int index);
     void currentTrackChanged(QString track);
     void progressChanged(int progress);
@@ -81,8 +80,9 @@ public slots:
     void setCurrentTrack(int index) const;
 //    void setVideoRect(QRect videoRect) const;
 
+
+    void sendPlayState(QMediaPlayer::State state) const;
 private:
-    void translatePlayStates() const;
 };
 
 #endif // QICSMEDIAPLAYER_H

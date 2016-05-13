@@ -22,6 +22,7 @@
 #include <QMap>
 #include <QObject>
 #include <QJsonArray>
+#include <QStringList>
 class MediaPlayerInterface;
 
 /** MediaSession manages a MediaSession playlist which is composed of contributions

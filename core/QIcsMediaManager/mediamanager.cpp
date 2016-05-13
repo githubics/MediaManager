@@ -16,9 +16,9 @@
 * along with this program; if not, write to the Free Software
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
-//#if ! defined QT_NO_DEBUG_OUTPUT
-//#define QT_NO_DEBUG_OUTPUT
-//#endif
+#if ! defined QT_NO_DEBUG_OUTPUT
+#define QT_NO_DEBUG_OUTPUT
+#endif
 #include <QDebug>
 #include <QStringList>
 #include <QDir>
@@ -53,18 +53,19 @@ static const QString LibPrefix = "lib";
 
 #include "mediamanager.h"
 
+
 MediaManager::MediaManager(QObject *parent)
     : QObject(parent)
-    , activeMediaSessionType(NoMediaType)
+    , activeMediaSessionType(mmTypes::NoType)
     , deviceManager(0)
 {
     // This is a hardcoded list of media device plugins and minimum required version numbers
-    knownMediaDevicePlugins["FileSystemDevice:120"] = USBDeviceType ;
-    knownMediaDevicePlugins["IPodDevice:100"] = IPodDeviceType ;
+    knownMediaDevicePlugins["FileSystemDevice:120"] = mmTypes::USBDevice ;
+    knownMediaDevicePlugins["IPodDevice:100"] = mmTypes::IPodDevice ;
 
     // This is a hardcoded list of media player plugins and minimum required version numbers
-    knownMediaPlayerPlugins["QIcsMediaPlayer:100"] = AudioFileMediaType;
-    knownMediaPlayerPlugins["QIcsAudioVideoPlayer:120"] = VideoFileMediaType;
+    knownMediaPlayerPlugins["QIcsMediaPlayer:100"] = mmTypes::AudioFile;
+    knownMediaPlayerPlugins["QIcsAudioVideoPlayer:120"] = mmTypes::VideoFile;
 
     // Hardcoded list of controller plugins.
     knownControllerPlugins["SimpleTcpController:100"] = "ReadWriteContollerType";
@@ -79,101 +80,87 @@ MediaManager::MediaManager(QObject *parent)
 
 }
 
-MediaManager::MediaType MediaManager::mediaTypeFromString(const QString mediaTypeStr) const
-{
-    QMetaEnum e = QMetaEnum::fromType<MediaType>();
-    int value = e.keyToValue(mediaTypeStr.toLatin1());
-    MediaType mediaType=(MediaType)value;
-    return mediaType;
-}
-
-QString MediaManager::mediaTypeToString(const MediaManager::MediaType type) const
-{
-    QMetaEnum e = QMetaEnum::fromType<MediaType>();
-    QString s = e.valueToKey(type);
-    return s;
-}
-
-MediaManager::MediaDeviceType MediaManager::mediaDeviceTypeFromString(const QString mediaDeviceTypeStr) const
-{
-    QMetaEnum e = QMetaEnum::fromType<MediaDeviceType>();
-    int value = e.keyToValue(mediaDeviceTypeStr.toLatin1());
-    MediaDeviceType type=(MediaDeviceType)value;
-    return type;
-}
-
-
 void MediaManager::play() const
 {
-    if (activeMediaSessionType==NoMediaType) return;
+    if (activeMediaSessionType==mmTypes::NoType) return;
     mediaSessions[activeMediaSessionType]->player()->play();
-    emit mediaPlayStateChanged(mediaSessions[activeMediaSessionType]->player()->playState());
     emit currentTrackIndex(mediaSessions[activeMediaSessionType]->player()->currentTrackIndex());
 }
 void MediaManager::pause() const
 {
-    if (activeMediaSessionType==NoMediaType) return;
+    if (activeMediaSessionType==mmTypes::NoType) return;
     mediaSessions[activeMediaSessionType]->player()->pause();
-    emit mediaPlayStateChanged(mediaSessions[activeMediaSessionType]->player()->playState());
     emit currentTrackIndex(mediaSessions[activeMediaSessionType]->player()->currentTrackIndex());
 }
 void MediaManager::stop() const
 {
-    if (activeMediaSessionType==NoMediaType) return;
+    if (activeMediaSessionType==mmTypes::NoType) return;
     mediaSessions[activeMediaSessionType]->player()->stop();
-    emit mediaPlayStateChanged(mediaSessions[activeMediaSessionType]->player()->playState());
     emit currentTrackIndex(mediaSessions[activeMediaSessionType]->player()->currentTrackIndex());
 }
 void MediaManager::next() const
 {
-    if (activeMediaSessionType==NoMediaType) return;
+    if (activeMediaSessionType==mmTypes::NoType) return;
     mediaSessions[activeMediaSessionType]->player()->next();
-    emit mediaPlayStateChanged(mediaSessions[activeMediaSessionType]->player()->playState());
 }
 void MediaManager::previous() const
 {
-    if (activeMediaSessionType==NoMediaType) return;
+    if (activeMediaSessionType==mmTypes::NoType) return;
     mediaSessions[activeMediaSessionType]->player()->previous();
-    emit mediaPlayStateChanged(mediaSessions[activeMediaSessionType]->player()->playState());
 }
 
 void MediaManager::sendCurrentTrackIndex() const
 {
-    if (activeMediaSessionType==NoMediaType) return;
+    if (activeMediaSessionType==mmTypes::NoType) return;
     emit currentTrackIndex(mediaSessions[activeMediaSessionType]->player()->currentTrackIndex());
 }
 
 void MediaManager::setCurrentTrackToIndex(int index) const
 {
-    if (activeMediaSessionType==NoMediaType) return;
+    if (activeMediaSessionType==mmTypes::NoType) return;
        mediaSessions[activeMediaSessionType]->player()->setCurrentTrack(index);
 }
 
 QString MediaManager::activeMediaSession() const
 {
-    return mediaTypeToString(activeMediaSessionType);
+    return mmTypes::Media(activeMediaSessionType);
 }
 
 void MediaManager::setActiveMediaSession(const QString mediaSession)
 {
-    MediaType mst=mediaTypeFromString(mediaSession);
+
+    MediaType mst=(MediaType)mmTypes::Media(mediaSession);
     setActiveMediaSession(mst);
+
 }
 
 void MediaManager::setActiveMediaSession(MediaManager::MediaType mediaType)
 {
-    if (mediaSessions.contains(mediaType) && (mediaType>NoMediaType))
+    if (activeMediaSessionType!=mmTypes::NoType) {
+        const MediaSession * ms=mediaSessions[activeMediaSessionType];
+        const MediaPlayerInterface * mp=ms->player();
+        disconnect(mp,&MediaPlayerInterface::playStateChanged,this,&MediaManager::mediaPlayStateChanged);
+    }
+
+    if (!mediaSessions.contains(mediaType)) return;
+    if (mediaType>mmTypes::NoType)
         activeMediaSessionType=mediaType;
-    emit activeMediaSessionChanged(mediaTypeToString(mediaType));
-    // TODO: we could consider not sending this everytime the session changes but then we need to make sure
-    // at least one controller requests it
+    emit activeMediaSessionChanged(mmTypes::Media(mediaType));
+
     emit activeMediaSessionPlaylist(mediaSessions[activeMediaSessionType]->mediaSessionPlaylist());
+
+    if (activeMediaSessionType!=mmTypes::NoType) {
+        const MediaSession * ms=mediaSessions[activeMediaSessionType];
+        const MediaPlayerInterface * mp=ms->player();
+        connect(mp,&MediaPlayerInterface::playStateChanged,this,&MediaManager::mediaPlayStateChanged);
+    }
 }
 
 void MediaManager::createMediaSource(const QString typeStr, const QUrl deviceUrl)
 {
-    const MediaManager::MediaDeviceType type=mediaDeviceTypeFromString(typeStr);
-    if (type==MediaManager::NoDeviceType) {
+//    const MediaManager::MediaDeviceType type=mediaDeviceTypeFromString(typeStr);
+    const MediaDeviceType type=(MediaDeviceType)mmTypes::Device(typeStr);
+    if (type==mmTypes::NoDevice) {
         qWarning() << Q_FUNC_INFO << "Unknown MediaDeviceType, no plugins known that can index devices of type" << typeStr;
         return;
     }
@@ -201,8 +188,8 @@ void MediaManager::createMediaSource(const QString typeStr, const QUrl deviceUrl
 
 void MediaManager::removeMediaSource(const QString typeStr, const QUrl deviceUrl)
 {
-    const MediaManager::MediaDeviceType type=mediaDeviceTypeFromString(typeStr);
-    if (type==MediaManager::NoDeviceType) {
+    const MediaDeviceType type=(MediaDeviceType)mmTypes::Device(typeStr);
+    if (type==mmTypes::NoDevice) {
         qWarning() << Q_FUNC_INFO << "Unknown MediaDeviceType, no plugins known that can index devices of type" << typeStr;
         return;
     }
@@ -213,15 +200,16 @@ void MediaManager::removeMediaSource(const QString typeStr, const QUrl deviceUrl
     // FIXME: This would have been easier if we just looped over all sessions and
     // removed the deviceUrlStr related data.
     const QString deviceUrlStr=ms->deviceUrlString();
-    for (int mt=(int)NoMediaType+1;mt<(int)EndMediaType;++mt)
+    for (int mt=mmTypes::NoType+1;mt<mmTypes::EndType;++mt)
     {
         MediaType mediaType=(const MediaType)mt;
-        QString mediaTypeStr=mediaTypeToString(mediaType);
+        QString mediaTypeStr=mmTypes::Media(mediaType);
         if (!ms->hasMediaType(mediaTypeStr)) continue;
         if (mediaSessions.contains(mediaType)) {
-            mediaSessions[mediaType]->removeMediaSourcePlaylist(deviceUrlStr);
+            mediaSessions[mediaType]->removeMediaSourcePlaylist(deviceUrlStr);          
         }
     }
+    emit activeMediaSessionPlaylist(mediaSessions[activeMediaSessionType]->mediaSessionPlaylist());
     ms->deleteLater();
 }
 
@@ -230,10 +218,10 @@ void MediaManager::updateMediaSession(const MediaSource * mediaSource)
 //    qDebug() << Q_FUNC_INFO << mediaSource;
     const QString deviceUrlStr=mediaSource->deviceUrlString();
 
-    for (int mt=(int)NoMediaType+1;mt<(int)EndMediaType;++mt)
+    for (int mt=mmTypes::NoType+1;mt<mmTypes::EndType;++mt)
     {
         MediaType mediaType=(const MediaType)mt;
-        QString mediaTypeStr=mediaTypeToString(mediaType);
+        QString mediaTypeStr=mmTypes::Media(mediaType);
         qDebug() << Q_FUNC_INFO << "looking for JSonArray for MediaType" << mediaTypeStr << "DeviceUrl" << deviceUrlStr;
 
         const QJsonArray playListArray=mediaSource->mediaArray(mediaTypeStr);
@@ -264,15 +252,11 @@ void MediaManager::updateMediaSession(const MediaSource * mediaSource)
         // the first one active until the user changes it through the controller
         if (mediaSessions.count()==1)
             setActiveMediaSession(mediaType);
+        else
+            emit activeMediaSessionPlaylist(mediaSessions[activeMediaSessionType]->mediaSessionPlaylist());
     }
 }
 
-#if 0
-void MediaManager::onProgressUpdate(const quint16 progress)
-{
-
-}
-#endif
 
 // TODO: Create a MediaManagerPluginLoader class that can get rid of the
 // code duplication here and load the plugins as required
@@ -360,7 +344,7 @@ void MediaManager::loadMediaPlayerPlugin(QPluginLoader & pluginLoader, const QSt
     qDebug() << Q_FUNC_INFO << pluginMediaTypes;
     // TODO: Check that sufficient file types are supported.
 
-    MediaType pluginType=NoMediaType;
+    MediaType pluginType=mmTypes::NoType;
     foreach (QString s, knownMediaPlayerPlugins.keys()) {
         QStringList sl=s.split(":");
         if (sl[0] == pluginName) {
@@ -412,7 +396,7 @@ void MediaManager::loadMediaPlayerPlugin(QPluginLoader & pluginLoader, const QSt
 void MediaManager::loadMediaDevicePlugin(QPluginLoader & pluginLoader, const QString pluginName, const int pluginVersionNumber)
 {
     bool loadPlugin=false;
-    MediaDeviceType pluginType=NoDeviceType;
+    MediaDeviceType pluginType=mmTypes::NoDevice;
     foreach (QString s, knownMediaDevicePlugins.keys()) {
         QStringList sl=s.split(":");
         if (sl[0] == pluginName) {
@@ -495,35 +479,33 @@ void MediaManager::loadMediaManagerControllerPlugin(QPluginLoader & pluginLoader
             qWarning() << Q_FUNC_INFO << "Plugin not loaded. Name and version okay but plugin did not load.";
         }
         else {
-            if (!controllerPlugins.contains(ctrlTypeStr)) {
-                qDebug() << Q_FUNC_INFO << "inserting plugin of ControllerType" << ctrlTypeStr << "with pointer" << ctrlPlugin;
-                controllerPlugins[ctrlTypeStr]=ctrlPlugin;
-                // From the MediaManager to the Controller
-                connect(this, &MediaManager::activeMediaSessionChanged,ctrlPlugin, &MediaManagerControllerInterface::setActiveMediaSession);
-                connect(this, &MediaManager::activeMediaSessionPlaylist,ctrlPlugin, &MediaManagerControllerInterface::setActiveMediaSessionPlaylist);
-                connect(this, &MediaManager::currentTrackIndex,ctrlPlugin, &MediaManagerControllerInterface::setCurrentTrackIndex);
-
-
-                connect(this, &MediaManager::mediaPlayStateChanged,ctrlPlugin, &MediaManagerControllerInterface::setPlayState);
-
-                // From the Controller to the MediaManager
-                connect(ctrlPlugin, &MediaManagerControllerInterface::requestSetActiveMediaSessionTo, this,
-                        static_cast < void(MediaManager::*)(const QString) > (&MediaManager::setActiveMediaSession));
-
-                connect(ctrlPlugin, &MediaManagerControllerInterface::requestCurrentTrackIndex, this, &MediaManager::sendCurrentTrackIndex);
-                connect(ctrlPlugin, &MediaManagerControllerInterface::requestTrackAtIndex, this, &MediaManager::setCurrentTrackToIndex);
-
-                connect(ctrlPlugin, &MediaManagerControllerInterface::requestPlay, this, &MediaManager::play);
-                connect(ctrlPlugin, &MediaManagerControllerInterface::requestPause, this, &MediaManager::pause);
-                connect(ctrlPlugin, &MediaManagerControllerInterface::requestStop, this, &MediaManager::stop);
-                connect(ctrlPlugin, &MediaManagerControllerInterface::requestNext, this, &MediaManager::next);
-                connect(ctrlPlugin, &MediaManagerControllerInterface::requestPrevious, this, &MediaManager::previous);
-                connect(ctrlPlugin, &MediaManagerControllerInterface::requestChangeVideoRectangle, this, &MediaManager::changeVideoRectangle);
+            if (controllerPlugins.contains(ctrlTypeStr)) {
+                // TODO: this is a little crude and could be improved, in fact we might want to change this to a MultiMap
+                ctrlTypeStr+="_1";
+                qDebug() << Q_FUNC_INFO << "Multiple plugins of the same type found. All will be loaded.";
             }
-            else {
-                qWarning() << Q_FUNC_INFO << "Multiple plugins with the same name found. First one will be used.";
-                pluginLoader.unload();
-            }
+            qDebug() << Q_FUNC_INFO << "inserting plugin of ControllerType" << ctrlTypeStr << "with pointer" << ctrlPlugin;
+            controllerPlugins[ctrlTypeStr]=ctrlPlugin;
+            // From the MediaManager to the Controller
+            connect(this, &MediaManager::activeMediaSessionChanged,ctrlPlugin, &MediaManagerControllerInterface::setActiveMediaSession);
+            connect(this, &MediaManager::activeMediaSessionPlaylist,ctrlPlugin, &MediaManagerControllerInterface::setActiveMediaSessionPlaylist);
+            connect(this, &MediaManager::currentTrackIndex,ctrlPlugin, &MediaManagerControllerInterface::setCurrentTrackIndex);
+
+            connect(this, &MediaManager::mediaPlayStateChanged,ctrlPlugin, &MediaManagerControllerInterface::setPlayState);
+
+            // From the Controller to the MediaManager
+            connect(ctrlPlugin, &MediaManagerControllerInterface::requestSetActiveMediaSessionTo, this,
+                    static_cast < void(MediaManager::*)(const QString) > (&MediaManager::setActiveMediaSession));
+
+            connect(ctrlPlugin, &MediaManagerControllerInterface::requestCurrentTrackIndex, this, &MediaManager::sendCurrentTrackIndex);
+            connect(ctrlPlugin, &MediaManagerControllerInterface::requestTrackAtIndex, this, &MediaManager::setCurrentTrackToIndex);
+
+            connect(ctrlPlugin, &MediaManagerControllerInterface::requestPlay, this, &MediaManager::play);
+            connect(ctrlPlugin, &MediaManagerControllerInterface::requestPause, this, &MediaManager::pause);
+            connect(ctrlPlugin, &MediaManagerControllerInterface::requestStop, this, &MediaManager::stop);
+            connect(ctrlPlugin, &MediaManagerControllerInterface::requestNext, this, &MediaManager::next);
+            connect(ctrlPlugin, &MediaManagerControllerInterface::requestPrevious, this, &MediaManager::previous);
+            connect(ctrlPlugin, &MediaManagerControllerInterface::requestChangeVideoRectangle, this, &MediaManager::changeVideoRectangle);
         }
     } else {
         qDebug() << Q_FUNC_INFO << "Plugin Load Error:";

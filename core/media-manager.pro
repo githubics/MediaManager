@@ -4,6 +4,7 @@ QIcsMediaPlayer \
 SimpleUiController \
 QIcsAudioVideoPlayer \
 SimpleDeviceManager \
-FileSystemDevice
+FileSystemDevice \
+QJsonRpcTcpController
 
 

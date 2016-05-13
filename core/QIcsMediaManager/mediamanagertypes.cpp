@@ -16,31 +16,6 @@
 * along with this program; if not, write to the Free Software
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
-#ifndef SIMPLEDEVICEMANAGER_H
-#define SIMPLEDEVICEMANAGER_H
-
-#include "../QIcsMediaManager/devicemanagerinterface.h"
-#include <QStringList>
-class QFileSystemWatcher;
-
-/** SimpleDeviceManager is a Plugin Interface for a Device Manager
- *  that watches system mounted devices such as USB Pendrives and SD Cards.
- **/
-class SimpleDeviceManager : public DeviceManagerInterface
-{
-    Q_OBJECT
-    Q_PLUGIN_METADATA(IID "com.ics.media-manager.DeviceManagerInterface" FILE "SimpleDeviceManager.json")
-    Q_INTERFACES(DeviceManagerInterface)
-public:
-    SimpleDeviceManager(QObject *parent = 0);
-
-protected slots:
-    void deviceChanged();
-
-private:
-    QFileSystemWatcher * m_usbWatcher;
-    QString m_usbWatchPath;
-    QStringList m_devices;
-};
-
-#endif // SIMPLEDEVICEMANAGER_H
+#include "mediamanagertypes.h"
+mmTypes::Enumeration mmTypes::Device(QStringList() << "NoDevice" << "USBDevice" << "IPodDevice" << "EndDevice");
+mmTypes::Enumeration mmTypes::Media(QStringList() << "NoType" << "AudioFile" << "VideoFile" << "EndType");

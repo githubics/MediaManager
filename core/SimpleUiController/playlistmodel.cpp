@@ -171,7 +171,9 @@ void PlayListModel::setCurrentIndex(int value)
         myCurrentIndex = value;
         if(myPlayList[myCurrentIndex]["Cover"] == "Yes")
         {
-            myCoverArt.setCoverData(myPlayList[myCurrentIndex]["Cover_Data"].toVariant().toByteArray());
+            const QJsonObject jo=myPlayList[myCurrentIndex];
+            const QByteArray ba=jo["Cover_Data"].toVariant().toByteArray();
+            myCoverArt.setCoverData(ba);
         }
         emit currentTrackChanged();
     }
