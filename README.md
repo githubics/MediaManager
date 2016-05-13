@@ -16,7 +16,7 @@ media-manager
               ZenLib
 ```
 
-After that change into the media-manager directory and run
+After that change into the media-manager/core directory and run
 ```
 git checkout master
 ```
