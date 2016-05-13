@@ -4,3 +4,9 @@
 [submodule "ZenLib"]
 	path = ZenLib
 	url = https://github.com/MediaArea/ZenLib.git
+[submodule "ics-plugins"]
+	path = ics-plugins
+	url = git@gitlab.ics.com:media-manager/ics-plugins.git
+[submodule "core"]
+	path = core
+	url = https://github.com/githubics/core.git

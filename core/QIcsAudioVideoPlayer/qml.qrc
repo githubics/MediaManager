@@ -1,6 +1,0 @@
-<RCC>
-    <qresource prefix="/mediaplayer">
-        <file>main.qml</file>
-        <file>Media.qml</file>
-    </qresource>
-</RCC>
