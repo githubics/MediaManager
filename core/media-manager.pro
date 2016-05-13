@@ -4,7 +4,10 @@ QIcsMediaPlayer \
 SimpleUiController \
 QIcsAudioVideoPlayer \
 SimpleDeviceManager \
-FileSystemDevice \
-QJsonRpcTcpController
+FileSystemDevice
 
+CONFIG(qjsonrpc) {
+    SUBDIRS += \
+    QJsonRpcTcpController
+}
 
