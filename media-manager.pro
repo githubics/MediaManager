@@ -6,23 +6,22 @@ SUBDIRS += core \
 core.file = core/media-manager.pro
 # core.depends += ics-plugins
 
+message ("Building Media Manager")
+message ("To build everything add: \"CONFIG+=build_all QJSONRPC_LIBRARY_TYPE=staticlib\" as qmake additional arguments")
+message ("Note that this only needs to be done once for the project and you can remove the above for subsequent builds until the libraries need to be rebuilt")
+message ("To build with C++11 support: \"CONFIG+=c++11\"")
+
 CONFIG (build_all) {
-    message("Compiling MediaManager including static libs for MediaInfoLib and ZenLib")
     SUBDIRS += \
     MediaInfoLib \
-    ZenLib
-
+    ZenLib \
+#    qjsonrpc
 #
     ZenLib.file = ZenLib/Project/Qt/ZenLib.pro
     MediaInfoLib.file = MediaInfoLib/Project/Qt/MediaInfoLib.pro
     MediaInfoLib.depends=ZenLib
     core.depends+=MediaInfoLib
-#
-    CONFIG (qjsonrpc) {
-        SUBDIRS += qjsonrpc
-        core.depends+=qjsonrpc
-    }
-
+#    ics-plugins.depends+=qjsonrpc
 }
 
 
