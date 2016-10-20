@@ -17,6 +17,7 @@ CONFIG (build_all) {
     ZenLib \
 #    qjsonrpc
 #
+
     ZenLib.file = ZenLib/Project/Qt/ZenLib.pro
     MediaInfoLib.file = MediaInfoLib/Project/Qt/MediaInfoLib.pro
     MediaInfoLib.depends=ZenLib
